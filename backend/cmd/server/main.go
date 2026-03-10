@@ -13,6 +13,7 @@ import (
 	"bambu-farm/pkg/config"
 	"bambu-farm/pkg/discovery"
 	"bambu-farm/pkg/logger"
+	"bambu-farm/pkg/queue"
 	"bambu-farm/pkg/telemetry"
 	"bambu-farm/repository"
 	"bambu-farm/service"
@@ -34,8 +35,9 @@ func main() {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
-	// Initialize Database
+	// Initialize Database and Redis
 	db := repository.InitDB()
+	rdb := queue.InitRedis()
 
 	// Initialize Repositories
 	authRepo := repository.NewAuthRepository(db)
@@ -44,10 +46,12 @@ func main() {
 	// Initialize Services
 	authService := service.NewAuthService(authRepo)
 	printerService := service.NewPrinterService(printerRepo)
+	jobService := service.NewJobService(db, rdb)
 
 	// Initialize Handlers
 	authHandler := api.NewAuthHandler(authService)
 	printerHandler := api.NewPrinterHandler(printerService)
+	jobHandler := api.NewJobHandler(jobService)
 
 	// Initialize router
 	router := gin.Default()
@@ -58,7 +62,11 @@ func main() {
 	// Register Feature routes
 	authHandler.RegisterRoutes(router)
 	printerHandler.RegisterRoutes(router)
+	jobHandler.RegisterRoutes(router)
 	
+	// Start Background Workers
+	queue.StartWorker(log, rdb)
+
 	// Start Discovery Engine
 	discoveryEngine := discovery.NewDiscoveryEngine(log, printerService)
 	discoveryEngine.Start(context.Background())
