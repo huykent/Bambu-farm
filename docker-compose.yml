@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   backend:
-    build: 
+    build:
       context: ./backend
       dockerfile: Dockerfile
     ports:
@@ -10,9 +10,16 @@ services:
     environment:
       - PORT=8080
       - ENV=development
+      - DATABASE_URL=postgres://bambu:bambupassword@db:5432/bambufarm?sslmode=disable
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - JWT_SECRET=bambu_hyper_secret_2026
     volumes:
       - ./backend:/app
     restart: unless-stopped
+    depends_on:
+      - db
+      - redis
 
   frontend:
     build:
@@ -21,7 +28,9 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - NODE_ENV=development
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=http://localhost:8080/api
+      - NEXT_PUBLIC_WS_URL=ws://localhost:8080/ws
     volumes:
       - ./frontend:/app
       - /app/node_modules
