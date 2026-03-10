@@ -12,7 +12,9 @@ import (
 	"bambu-farm/api"
 	"bambu-farm/pkg/config"
 	"bambu-farm/pkg/logger"
-
+	"bambu-farm/pkg/discovery"
+	"bambu-farm/repository"
+	"bambu-farm/service"
 	"github.com/gin-gonic/gin"
 )
 
@@ -55,6 +57,10 @@ func main() {
 	// Register Feature routes
 	authHandler.RegisterRoutes(router)
 	printerHandler.RegisterRoutes(router)
+	
+	// Start Discovery Engine
+	discoveryEngine := discovery.NewDiscoveryEngine(log, printerService)
+	discoveryEngine.Start(context.Background())
 
 	// Setup Server
 	addr := fmt.Sprintf(":%s", cfg.Port)
