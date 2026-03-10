@@ -82,6 +82,22 @@ Mở trình duyệt web của bạn (Chrome, Edge, Cốc Cốc...) và truy cậ
 - **Giao diện người dùng (Frontend):** `http://localhost:3000`
 - **Máy chủ dữ liệu (Backend API):** `http://localhost:8080` (Bạn có thể kiểm tra sức khoẻ server qua `http://localhost:8080/health`)
 
+### Bước 7: Tự động khởi động cùng Windows (Tùy chọn)
+Nếu bạn muốn hệ thống tự động chạy mỗi khi bật máy:
+1. Chạy file `install_startup.bat`.
+2. Từ giờ, Bambu Farm sẽ tự khởi động ngầm mỗi khi bạn mở máy tính.
+
+---
+
+## Các công cụ (Scripts) đi kèm
+
+Chúng tôi cung cấp một số công cụ để bạn thao tác nhanh hơn:
+
+- **`start_hidden.vbs`**: Chạy toàn bộ hệ thống dưới nền ẩn (không hiện cửa sổ đen CMD).
+- **`stop_app.bat`**: **Nút Tắt** nhanh toàn bộ hệ thống.
+- **`install_startup.bat`**: Cài đặt để hệ thống tự chạy khi bật máy.
+- **`remove_startup.bat`**: Gỡ bỏ tính năng tự chạy khi bật máy.
+
 ---
 
 ## Các thao tác (Commands) hữu ích nên biết
@@ -93,10 +109,13 @@ docker-compose down
 
 Nếu bạn muốn **xem log (lịch sử lỗi/hoạt động)** của máy chủ Backend:
 ```cmd
-docker-compose logs -f bambu-backend
+docker-compose logs -f backend
 ```
 
 Nếu bạn sửa code và muốn hệ thống **cập nhật lại mã nguồn mới**:
 ```cmd
 docker-compose up --build -d
 ```
+
+---
+**Tác giả:** Quang Huy with Antigravity
