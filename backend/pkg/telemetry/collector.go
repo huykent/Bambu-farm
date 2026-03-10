@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"bambu-farm/domain"
+	"bambu-farm/pkg/realtime"
 	"bambu-farm/service"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
@@ -19,15 +20,17 @@ type Collector struct {
 	logger         *zap.SugaredLogger
 	db             *gorm.DB
 	printerService *service.PrinterService
+	broadcaster    *realtime.Broadcaster
 	clients        map[uint]*MQTTClient
 	mu             sync.RWMutex
 }
 
-func NewCollector(logger *zap.SugaredLogger, db *gorm.DB, printerService *service.PrinterService) *Collector {
+func NewCollector(logger *zap.SugaredLogger, db *gorm.DB, printerService *service.PrinterService, broadcaster *realtime.Broadcaster) *Collector {
 	return &Collector{
 		logger:         logger,
 		db:             db,
 		printerService: printerService,
+		broadcaster:    broadcaster,
 		clients:        make(map[uint]*MQTTClient),
 	}
 }
@@ -106,16 +109,30 @@ func (c *Collector) createMessageHandler(printerID uint) mqtt.MessageHandler {
 			// Extract Nozzle Temp
 			if nozzleTarget, ok := printData["nozzle_temper"].(float64); ok {
 				c.saveMetric(printerID, "nozzle_temp", nozzleTarget)
+				c.broadcaster.Publish(realtime.TemperatureUpdate, gin.H{
+					"printer_id": printerID,
+					"type": "nozzle",
+					"value": nozzleTarget,
+				})
 			}
 			
 			// Extract Bed Temp
 			if bedTarget, ok := printData["bed_temper"].(float64); ok {
 				c.saveMetric(printerID, "bed_temp", bedTarget)
+				c.broadcaster.Publish(realtime.TemperatureUpdate, gin.H{
+					"printer_id": printerID,
+					"type": "bed",
+					"value": bedTarget,
+				})
 			}
 			
 			// Extract Progress
 			if progress, ok := printData["mc_percent"].(float64); ok {
 				c.saveMetric(printerID, "progress", progress)
+				c.broadcaster.Publish(realtime.JobProgress, gin.H{
+					"printer_id": printerID,
+					"progress": progress,
+				})
 			}
 		}
 	}

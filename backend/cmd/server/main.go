@@ -14,6 +14,7 @@ import (
 	"bambu-farm/pkg/discovery"
 	"bambu-farm/pkg/logger"
 	"bambu-farm/pkg/queue"
+	"bambu-farm/pkg/realtime"
 	"bambu-farm/pkg/telemetry"
 	"bambu-farm/repository"
 	"bambu-farm/service"
@@ -53,11 +54,21 @@ func main() {
 	printerHandler := api.NewPrinterHandler(printerService)
 	jobHandler := api.NewJobHandler(jobService)
 
+	// Initialize Realtime WebSocket Manager
+	wsManager := realtime.NewManager(log)
+	go wsManager.Run()
+	broadcaster := realtime.NewBroadcaster(wsManager)
+
 	// Initialize router
 	router := gin.Default()
 
 	// Register generic routes
 	api.RegisterRoutes(router)
+
+	// Websocket endpoint
+	router.GET("/ws", func(c *gin.Context) {
+		wsManager.HandleConnections(c)
+	})
 
 	// Register Feature routes
 	authHandler.RegisterRoutes(router)
@@ -72,7 +83,7 @@ func main() {
 	discoveryEngine.Start(context.Background())
 
 	// Start Telemetry Collector
-	telemetryCollector := telemetry.NewCollector(log, db, printerService)
+	telemetryCollector := telemetry.NewCollector(log, db, printerService, broadcaster)
 	telemetryCollector.Start(context.Background())
 
 	// Setup Server
