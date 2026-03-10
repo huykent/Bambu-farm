@@ -11,6 +11,7 @@ import (
 
 	"bambu-farm/api"
 	"bambu-farm/pkg/config"
+	"bambu-farm/pkg/camera"
 	"bambu-farm/pkg/discovery"
 	"bambu-farm/pkg/logger"
 	"bambu-farm/pkg/queue"
@@ -48,11 +49,13 @@ func main() {
 	authService := service.NewAuthService(authRepo)
 	printerService := service.NewPrinterService(printerRepo)
 	jobService := service.NewJobService(db, rdb)
+	cameraProxy := camera.NewProxyService(log, printerService)
 
 	// Initialize Handlers
 	authHandler := api.NewAuthHandler(authService)
 	printerHandler := api.NewPrinterHandler(printerService)
 	jobHandler := api.NewJobHandler(jobService)
+	cameraHandler := api.NewCameraHandler(cameraProxy)
 
 	// Initialize Realtime WebSocket Manager
 	wsManager := realtime.NewManager(log)
@@ -74,6 +77,7 @@ func main() {
 	authHandler.RegisterRoutes(router)
 	printerHandler.RegisterRoutes(router)
 	jobHandler.RegisterRoutes(router)
+	cameraHandler.RegisterRoutes(router)
 	
 	// Start Background Workers
 	queue.StartWorker(log, rdb)
