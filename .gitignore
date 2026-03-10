@@ -1,0 +1,31 @@
+# Junk files identified by user
+bambulab_api_integration.md
+ui_design_bambulab_dashboard.md
+workflow_bambulab_system.md
+
+# OS files
+.DS_Store
+Thumbs.db
+*.log
+
+# Backend
+backend/bin/
+backend/main
+backend/.env
+
+# Frontend
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/.env
+frontend/.env.local
+frontend/.env.production
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
