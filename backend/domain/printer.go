@@ -44,3 +44,12 @@ type PrinterLog struct {
 	ErrorCode  string    `json:"error_code,omitempty"`
 	RecordedAt time.Time `gorm:"autoCreateTime" json:"recorded_at"`
 }
+
+type PrinterMetric struct {
+	ID        uint      `gorm:"primaryKey" json:"id"`
+	PrinterID uint      `gorm:"index" json:"printer_id"`
+	MetricKey string    `gorm:"index" json:"metric_key"` // e.g. "nozzle_temp", "progress"
+	Value     float64   `json:"value"`
+	Timestamp time.Time `gorm:"autoCreateTime" json:"timestamp"`
+}
+

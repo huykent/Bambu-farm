@@ -52,6 +52,7 @@ func InitDB() *gorm.DB {
 		&domain.Printer{},
 		&domain.PrinterStatus{},
 		&domain.PrinterLog{},
+		&domain.PrinterMetric{},
 	)
 	if err != nil {
 		log.Fatalf("Failed to auto-migrate database: %v", err)
