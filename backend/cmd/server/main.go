@@ -50,6 +50,7 @@ func main() {
 	printerService := service.NewPrinterService(printerRepo)
 	jobService := service.NewJobService(db, rdb)
 	cameraProxy := camera.NewProxyService(log, printerService)
+	alertService := service.NewAlertService(log, db)
 
 	// Initialize Handlers
 	authHandler := api.NewAuthHandler(authService)
@@ -87,7 +88,7 @@ func main() {
 	discoveryEngine.Start(context.Background())
 
 	// Start Telemetry Collector
-	telemetryCollector := telemetry.NewCollector(log, db, printerService, broadcaster)
+	telemetryCollector := telemetry.NewCollector(log, db, printerService, alertService, broadcaster)
 	telemetryCollector.Start(context.Background())
 
 	// Setup Server

@@ -20,16 +20,18 @@ type Collector struct {
 	logger         *zap.SugaredLogger
 	db             *gorm.DB
 	printerService *service.PrinterService
+	alertService   *service.AlertService
 	broadcaster    *realtime.Broadcaster
 	clients        map[uint]*MQTTClient
 	mu             sync.RWMutex
 }
 
-func NewCollector(logger *zap.SugaredLogger, db *gorm.DB, printerService *service.PrinterService, broadcaster *realtime.Broadcaster) *Collector {
+func NewCollector(logger *zap.SugaredLogger, db *gorm.DB, printerService *service.PrinterService, alertService *service.AlertService, broadcaster *realtime.Broadcaster) *Collector {
 	return &Collector{
 		logger:         logger,
 		db:             db,
 		printerService: printerService,
+		alertService:   alertService,
 		broadcaster:    broadcaster,
 		clients:        make(map[uint]*MQTTClient),
 	}
@@ -114,6 +116,11 @@ func (c *Collector) createMessageHandler(printerID uint) mqtt.MessageHandler {
 					"type": "nozzle",
 					"value": nozzleTarget,
 				})
+
+				// Anomaly Detection Rule (Example)
+				if nozzleTarget > 300 {
+					c.alertService.HandleAlert(1, printerID, "critical", "temp_anomaly", fmt.Sprintf("Nozzle Temp dangerous: %f", nozzleTarget))
+				}
 			}
 			
 			// Extract Bed Temp
